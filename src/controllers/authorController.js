@@ -67,60 +67,6 @@ const findAuthor=async function(req,res){
       let s = await AuthorModel.find(data);
       res.status(200).send(s);}
 
-
-    // } else {
-    //   console.log("..........72");
-    //   filter['$or'] = [
-    //     { authorId: data.authorId },
-    //     { fname: data.fname },
-    //     { lname: data.lname }
-    //   ];
-    //   console.log(filter);
-    //          let allAuthor = await AuthorModel.find(filter);
-
-    //   if (allAuthor.length == 0) {
-    //     return res.status(404).send({ status: false, msg: 'author not found' });
-    //   } 
-    //   res.status(200).send(allAuthor);
-    // }
-//......................
-// const findAuthor = async function(req, res) {
-//   try {
-//     let data = req.query;
-//     let filter = { isDeleted: false };
-
-//     if (Object.keys(data).length == 0) {
-//       let s = await AuthorModel.find(filter);
-//       res.status(200).send(s);
-//     } else {
-//       let orCondition = [];
-
-//       if (data.authorId) {
-//         orCondition.push({ authorId: data.authorId })}
-
-//       if (data.fname) {
-//         orCondition.push({ fname: data.fname })}
-
-//       if (data.lname) {
-//         orCondition.push({ lname: data.lname })}
-
-//       if (orCondition.length == 0) {
-//         return res.status(400).send({ status: false, msg: 'Invalid query parameters' })}
-
-//       filter['$or'] = orCondition;
-
-//       let allAuthor = await AuthorModel.find(filter);
-
-//       if (allAuthor.length == 0) {
-//         return res.status(404).send({ status: false, msg: 'Author not found' });
-//       }
-
-//       res.status(200).send(allAuthor);
-//     }
-//   } catch (err) {
-//     res.status(500).send({ msg: 'Error', error: err.message });
-//   }
-// };
 //...................
 if(data.fname){
   let allAuthor = await AuthorModel.find({fname: data.fname});
