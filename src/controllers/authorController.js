@@ -27,12 +27,12 @@ const createAuthor = async function (req, res) {
     if (!nameRegex.test(authorData.fname) || !nameRegex.test(authorData.lname)) {
       return res.status(400).send({ msg: 'Please enter valid characters only in fname and lname' });
     }
+    if (!authorData.email)
+    return res.status(400).send({ status: false, msg: 'email required' });
 
     if (!mailRegex.test(authorData.email)) {
       return res.status(400).send({ msg: 'Please enter valid mailId' });
     }
-    if (!authorData.email)
-      return res.status(400).send({ status: false, msg: 'email required' });
       
     const email = await AuthorModel.findOne({ email: authorData.email });
     if (email) return res.status(400).send({ status: false, msg: 'email already taken' });
@@ -62,7 +62,7 @@ const findAuthor=async function(req,res){
     
 
     if (Object.keys(data).length == 0) {
-     console.log("..........66");
+ 
       let s = await AuthorModel.find(data);
       res.status(200).send(s);}
 
@@ -70,7 +70,7 @@ if(data.fname){
   let allAuthor = await AuthorModel.find({fname: data.fname,isDeleted:false});
 
       if (allAuthor.length==0) {
-        console.log("........130");
+       
         return res.status(404).send({ status: false, msg: 'author not found.......' });
       }
      
@@ -81,7 +81,7 @@ if(data.lname){
   let allAuthor = await AuthorModel.find({lname: data.lname,isDeleted:false});
 
       if (allAuthor.length==0) {
-        console.log("........139");
+      
         return res.status(404).send({ status: false, msg: 'author not found' });
       } 
     
@@ -182,7 +182,7 @@ const deleteAuthor = async function (req, res) {
     const allAuthor = await AuthorModel.findOne({ _id: id, isDeleted: false });
     if (!allAuthor) { return res.status(404).send({ status: false, msg: 'This author is not found or deleted.' });}
     allAuthor.isDeleted = true;
-console.log("........186");
+
 
 let token = req.headers['x-api-key']
 
@@ -195,7 +195,7 @@ if (!token) return res.status(400).send({ status: false, message: "token must be
           req.decodedToken = decoded
       }
   })
-  console.log(".....194");
+
         let tokenUserId = req.decodedToken.authorId
   
         if (id != tokenUserId) {
@@ -241,7 +241,7 @@ const loginAuthor = async function (req, res) {
       {
         authorId: findAuthor._id.toString(),
       },
-      'group-21'
+      'group-21',{ expiresIn: '50d' }
     );
     res.setHeader('x-api-key', token);
     res.status(200).send({ status: true, token: token });

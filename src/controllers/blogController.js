@@ -1,11 +1,12 @@
 const AuthorModel = require('../models/authorModel');
-const BlogModel = require('../models/blogModel');
+const BlogModel = require("../models/blogModel");
 const jwt = require('jsonwebtoken');
 
 //----------------------------------------------------------------------------------------------------//
 
 const createBlog = async function (req, res) {
   try {
+ 
     let data = req.body;
 
     let token = req.headers['x-api-key'];
@@ -51,7 +52,7 @@ const getAllBlogs = async function (req, res) {
     
 
     if (Object.keys(data).length == 0) {
-     
+   
       let allBlogs = await BlogModel.find(filter);
       res.status(200).send(allBlogs);
 
@@ -82,9 +83,10 @@ const getAllBlogs = async function (req, res) {
 
 const updateBlog = async function (req, res) {
   try {
-    let id = req.params.blogId;
+ 
+    let blogId = req.params.blogId;
     let data = req.body;
-    let blog = await BlogModel.findOne({ _id: id, isDeleted: false });
+    let blog = await BlogModel.findOne({ _id: blogId, isDeleted: false });
     if (Object.keys(blog).length == 0) {
       return res.status(404).send('No such blog found');
 
@@ -98,7 +100,7 @@ const updateBlog = async function (req, res) {
 
     blog.isPublished = true;
     blog.publishedAt = Date();
-    let updateData = await BlogModel.findByIdAndUpdate({ _id: id }, blog, {
+    let updateData = await BlogModel.findByIdAndUpdate({ _id: blogId }, blog, {
       new: true,
     });
     res.status(200).send({ status: true, msg: updateData });
@@ -112,6 +114,7 @@ const updateBlog = async function (req, res) {
 
 const deleteByParams = async function (req, res) {
   try {
+ 
     let id = req.params.blogId;
     const allBlogs = await BlogModel.findOne({ _id: id, isDeleted: false });
     if (!allBlogs) { return res.status(404).send({ status: false, msg: 'This blog is not found or deleted.' });}

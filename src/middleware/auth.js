@@ -7,6 +7,7 @@ const BlogModel = require("../models/blogModel");
 const authenticate = function (req, res, next) {
   try {
     let token = req.headers["x-api-key"];
+   
     if (!token)
       return res
         .status(400)
@@ -16,7 +17,8 @@ const authenticate = function (req, res, next) {
 
     if (!decodedToken)
       return res.status(401).send({ status: false, msg: "token is not valid" });
-    req.decodedToken = decoded;
+    
+   
     next();
   } catch (err) {
     res.status(500).send({ Status: false, msg: err.message });
@@ -29,16 +31,16 @@ const authorise = async function (req, res, next) {
   try {
     token = req.headers["x-api-key"];
 
-    let blogId = req.query.blogId;
+    let blogId = req.params.blogId;
 
     let decodedToken = jwt.verify(token, "group-21");
 
     let authorId = decodedToken.authorId;
 
-    console.log(blogId, "----------37");
 
-    let findBlog = await BlogModel.findOne({ authorId: authorId, _id: blogId });
 
+    let findBlog = await BlogModel.findOne({authorId: authorId,_id: blogId });
+console.log("......43",findBlog);
     if (!findBlog)
       return res.status(403).send({
         status: false,
