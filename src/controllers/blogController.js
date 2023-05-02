@@ -56,13 +56,7 @@ const getAllBlogs = async function (req, res) {
       res.status(200).send(allBlogs);
 
     } else {
-      // if (data.tags) {
-      //   data.tags = { $in: data.tags.split(',') };
-      // }
-
-      // if (data.subcategory) {
-      //   data.subcategory = { $in: data.subcategory.split(',') };
-      // }
+  
 
       filter['$or'] = [
         { authorId: data.authorId },
