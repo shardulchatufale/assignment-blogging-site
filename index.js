@@ -8,7 +8,7 @@ app.use(bodyParser.json());//convert the incoming request body parse and to json
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-mongoose.connect('mongodb+srv://anik2310:anik123@cluster0.tby9aun.mongodb.net/produced_pooja',{
+mongoose.connect('mongodb+srv://anik2310:anik123@cluster0.tby9aun.mongodb.net/ttechmical',{
       useNewUrlParser: true,
     }
   )

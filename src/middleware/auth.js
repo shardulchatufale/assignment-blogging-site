@@ -1,21 +1,22 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
-const BlogModel = require('../models/blogModel');
+const BlogModel = require("../models/blogModel");
 
 //------------------------------------------------------------------------------------------//
 
 const authenticate = function (req, res, next) {
   try {
-    let token = req.headers['x-api-key'];
-    if (!token)return res
+    let token = req.headers["x-api-key"];
+    if (!token)
+      return res
         .status(400)
-        .send({ status: false, msg: 'token must be present' });
+        .send({ status: false, msg: "token must be present" });
 
-    let decodedToken = jwt.verify(token, 'group-21');
-    
+    let decodedToken = jwt.verify(token, "group-21");
+
     if (!decodedToken)
-      return res.status(401).send({ status: false, msg: 'token is not valid' });
-
+      return res.status(401).send({ status: false, msg: "token is not valid" });
+    req.decodedToken = decoded;
     next();
   } catch (err) {
     res.status(500).send({ Status: false, msg: err.message });
@@ -26,22 +27,22 @@ const authenticate = function (req, res, next) {
 
 const authorise = async function (req, res, next) {
   try {
-    token = req.headers['x-api-key'];
+    token = req.headers["x-api-key"];
 
     let blogId = req.query.blogId;
 
-    let decodedToken = jwt.verify(token, 'group-21');
+    let decodedToken = jwt.verify(token, "group-21");
 
     let authorId = decodedToken.authorId;
-console.log(authorId)
-console.log(blogId,'----------37')
+
+    console.log(blogId, "----------37");
 
     let findBlog = await BlogModel.findOne({ authorId: authorId, _id: blogId });
 
     if (!findBlog)
-      return res.status(403).send({ 
+      return res.status(403).send({
         status: false,
-        msg: 'Unauthorized User',
+        msg: "Unauthorized User",
       });
 
     next();

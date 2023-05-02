@@ -3,6 +3,7 @@ const { log } = require('console');
 const AuthorModel = require('../models/authorModel.js');
 const jwt = require('jsonwebtoken');
 
+
 //----------------------------------------------------------------------------------------------------//
 
 const createAuthor = async function (req, res) { 
@@ -23,9 +24,7 @@ const createAuthor = async function (req, res) {
     if (!authorData.lname)
       return res.status(400).send({ status: false, msg: 'last name required' });
 
-    if (
-      !nameRegex.test(authorData.fname) || !nameRegex.test(authorData.lname)
-    ) {
+    if (!nameRegex.test(authorData.fname) || !nameRegex.test(authorData.lname)) {
       return res.status(400).send({ msg: 'Please enter valid characters only in fname and lname' });
     }
 
@@ -67,32 +66,32 @@ const findAuthor=async function(req,res){
       let s = await AuthorModel.find(data);
       res.status(200).send(s);}
 
-//...................
 if(data.fname){
-  let allAuthor = await AuthorModel.find({fname: data.fname});
+  let allAuthor = await AuthorModel.find({fname: data.fname,isDeleted:false});
 
-      if (allAuthor.length == 0) {
+      if (allAuthor.length==0) {
         console.log("........130");
-        return res.status(404).send({ status: false, msg: 'author not found' });
-      } 
+        return res.status(404).send({ status: false, msg: 'author not found.......' });
+      }
+     
       res.status(200).send(allAuthor);
 }
 
 if(data.lname){
-  let allAuthor = await AuthorModel.find({lname: data.lname});
+  let allAuthor = await AuthorModel.find({lname: data.lname,isDeleted:false});
 
-      if (allAuthor.length == 0) {
+      if (allAuthor.length==0) {
         console.log("........139");
         return res.status(404).send({ status: false, msg: 'author not found' });
       } 
+    
       res.status(200).send(allAuthor);
 }
 if(data.authorId){
   let allAuthor = await AuthorModel.findById({_id:data.authorId});
-      if (allAuthor.length == 0) {
-        console.log(".......148");
-        return res.status(404).send({ status: false, msg: 'author not found' });
-      } 
+  if(allAuthor.isDeleted==true){
+    return res.status(404).send({ status: false, msg: 'author not found' });
+  }
       res.status(200).send(allAuthor);
 }
 
@@ -103,32 +102,78 @@ if(data.authorId){
 
 //.....................................................................................................
 
-const updateAuthor = async function (req, res) {
-
+let updateAuthor = async (req, res) => {
   try {
-    console.log("......93");
-    let id = req.params.authorId;
-    let data = req.body;
-    let author = await AuthorModel.findOne({ _id: id, isDeleted: false });
-    if (Object.keys(author).length == 0) {
-      return res.status(404).send('No such author found');
+   
+      let data = req.body;
+ 
+      let { fname, lname,password, authorId, email,...rest } = data;
+
+      let nameRejex=/^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/
+      let passRejex=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{8,15}$/
+      let emailRejex=/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+
+     
+      if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: `you can't update on ${Object.keys(rest)} key` })
+
+     
+      let finduser = await AuthorModel.findById({_id:data. authorId});
+    
+      
+      if (!finduser) return res.status(404).send({ status: false, message: 'user id does not exist' });
+    
+
+      if (fname) {          //Update first name
+          if (!nameRejex.test(fname)) return res.status(400).send({ status: false, message: 'Please enter first name in right formate' })
+          finduser.fname = fname;
+      }
+
+      if (lname) {        //Update last name
+          if (!nameRejex.test(lname)) return res.status(400).send({ status: false, message: 'Please enter last name in right formate' })
+          finduser.lname = lname;
+      }
+
+      if (email) {        //Update email
+          if (!emailRejex.test(email)) return res.status(400).send({ status: false, message: 'Please enter valid email' })
+          const emailUnique = await AuthorModel.findOne({ email })
+          if (emailUnique) return res.status(400).send({ status: false, message: 'Already register Email' })
+          finduser.email = email
+      }
+
+      if (password) {     //Update password
+          if (!passRejex.test(password)) return res.status(400).send({ status: false, message: 'Password should be between 8 to 15 character' })
+          finduser.password = password
+      }
+
+let token = req.headers['x-api-key']
+
+if (!token) return res.status(400).send({ status: false, message: "token must be present" });
+
+// token = token.split(" ")[1]
+
+jwt.verify(token, "group-21", function (err, decoded) {
+    if (err) {
+       return res.status(401).send({ status: false, message: err.message })
+    } else {
+        req.decodedToken = decoded
     }
-  
-    if (data.fname) {author.fname = data.fname;}
-    if (data.lname)  {author.lname = data.lname;}
+})
 
+      let tokenUserId = req.decodedToken.authorId
 
-    author.isPublished = true;
-    author.publishedAt = Date();
-    let updateData = await AuthorModel.findByIdAndUpdate({ _id: id }, author, {
-      new: true,
-    });
-    res.status(200).send({ status: true, msg: updateData });
-    console.log(updateData)
+      if (authorId != tokenUserId) {
+          return res.status(403).send({ status: false, message: "UnAuthorized Access!!" })
+      }
+      //Update Profile
+      let updateProfile = await AuthorModel.findByIdAndUpdate({ _id: authorId }, finduser, { new: true });
+
+      //Send Response
+      res.status(200).send({ status: true, message: "User profile updated", data: updateProfile });
+
   } catch (err) {
-    res.status(500).send({ status: false, msg: err.message });
+      return res.status(500).send({ status: false, message: err.message })
   }
-};
+}
 //......................................................................................................
 
 const deleteAuthor = async function (req, res) {
@@ -137,6 +182,25 @@ const deleteAuthor = async function (req, res) {
     const allAuthor = await AuthorModel.findOne({ _id: id, isDeleted: false });
     if (!allAuthor) { return res.status(404).send({ status: false, msg: 'This author is not found or deleted.' });}
     allAuthor.isDeleted = true;
+console.log("........186");
+
+let token = req.headers['x-api-key']
+
+if (!token) return res.status(400).send({ status: false, message: "token must be present" });
+
+    jwt.verify(token, "group-21", function (err, decoded) {
+      if (err) {
+         return res.status(401).send({ status: false, message: err.message })
+      } else {
+          req.decodedToken = decoded
+      }
+  })
+  console.log(".....194");
+        let tokenUserId = req.decodedToken.authorId
+  
+        if (id != tokenUserId) {
+            return res.status(403).send({ status: false, message: "UnAuthorized Access!!" })
+        }
     const updated = await AuthorModel.findByIdAndUpdate({ _id: id }, allAuthor, {
       new: true,
     });

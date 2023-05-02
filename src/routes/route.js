@@ -10,9 +10,9 @@ router.post('/authors', AuthorController.createAuthor);
 
 router.get("/findAuthor",AuthorController.findAuthor)
 
-router.put("/updateAuthor/:authorId",middleware.authenticate,middleware.authorise, AuthorController.updateAuthor)
+router.put("/updateAuthor/:authorId", AuthorController.updateAuthor)
 
-router.delete("/deleteAuthor/:authorId",middleware.authenticate,middleware.authorise, AuthorController.deleteAuthor)
+router.delete("/deleteAuthor/:authorId", AuthorController.deleteAuthor)
 
 router.post('/blogs', middleware.authenticate, BlogController.createBlog);
 
